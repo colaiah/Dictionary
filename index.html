@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hiligaynon/Karay-a Dictionary</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh; /* Changed to min-height */
+            background: linear-gradient(135deg, #a8edea, #fed6e3);
+            font-family: 'Montserrat', sans-serif;
+            overflow-x: hidden; /* Prevent horizontal scroll */
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        #initialContent {
+            position: relative;
+            width: 100%;
+            text-align: center;
+        }
+
+        .floating-name {
+            font-size: 2.5em; /* Adjusted font size */
+            color: #2c3e50;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            margin-bottom: 30px; /* Added margin */
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            animation: float 4s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px); /* Adjusted float height */
+            }
+        }
+
+        .enter-button {
+            padding: 15px 35px; /* Adjusted padding */
+            font-size: 1.2em;
+            background: linear-gradient(to right, #6dd5ed, #2193b0);
+            color: white;
+            border: none;
+            border-radius: 25px; /* Adjusted border radius */
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            font-weight: 600;
+        }
+
+        .enter-button:hover {
+            transform: translateY(-3px); /* Adjusted hover effect */
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.3);
+        }
+
+        #particles-js {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        #dictionaryPage {
+            display: none;
+            width: 90%; /* Adjusted width */
+            max-width: 600px; /* Added max-width */
+            margin-top: 20px; /* Added margin */
+            background: white;
+            border-radius: 10px; /* Added border radius */
+            overflow-y: auto;
+            padding: 20px;
+            box-sizing: border-box;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Added shadow */
+        }
+
+        #dictionaryPage h2 {
+            font-family: 'Playfair Display', serif;
+            margin-bottom: 20px;
+        }
+
+        #dictionaryPage .word-pair {
+            margin-bottom: 10px;
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+        }
+
+        #dictionaryPage .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        #dictionaryPage .pagination button {
+            padding: 8px 16px;
+            margin: 0 8px;
+            font-size: 1em;
+            cursor: pointer;
+            background-color: #f0f0f0;
+            border: none;
+            border-radius: 5px;
+        }
+
+        #searchBar {
+            width: 90%; /* Adjusted width */
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        @media (max-width: 600px) {
+            .floating-name {
+                font-size: 2em;
+            }
+            .enter-button {
+                padding: 12px 30px;
+                font-size: 1em;
+            }
+            #dictionaryPage {
+                width: 95%;
+                padding:15px;
+            }
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+</head>
+<body>
+    <div id="initialContent">
+        <div id="particles-js"></div>
+        <div class="floating-name">HILIGAYNON/KARAY-A DICTIONARY</div>
+        <button class="enter-button" id="enterDictionaryButton">Enter Dictionary</button>
+    </div>
+
+    <div id="dictionaryPage">
+        <h2>Tagalog-Hiligaynon Dictionary</h2>
+        <input type="text" id="searchBar" placeholder="Search Tagalog or Hiligaynon...">
+        <div id="wordList"></div>
+        <div class="pagination">
+            <button id="prevPage">Back</button>
+            <button id="nextPage">Next</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const dictionaryData = [
+            { tagalog: "Araw", hiligaynon: "Adlaw" }, { tagalog: "Bahay", hiligaynon: "Balay" }, { tagalog: "Ganda", hiligaynon: "Guapa" }, { tagalog: "Pagkain", hiligaynon: "Kaon" }, { tagalog: "Tubig", hiligaynon: "Tubig" },
+            { tagalog: "Tao", hiligaynon: "Tawo" }, { tagalog: "Lupa", hiligaynon: "Duta" }, { tagalog: "Hangin", hiligaynon: "Hangin" }, { tagalog: "Apoy", hiligaynon: "Kalayo" }, { tagalog: "Puso", hiligaynon: "Tagipusuon" },
+            { tagalog: "Kamay", hiligaynon: "Kamot" }, { tagalog: "Paaralan", hiligaynon: "Eskwelahan" }, { tagalog: "Pamilya", hiligaynon: "Pamilya" }, { tagalog: "Kaibigan", hiligaynon: "Abyan" }, { tagalog: "Pag-ibig", hiligaynon: "Pagpalangga" },
+            { tagalog: "Bukas", hiligaynon: "Buwas" }, { tagalog: "Kahapon", hiligaynon: "Kahapon" }, { tagalog: "Ngayon", hiligaynon: "Subong" }, { tagalog: "Puno", hiligaynon: "Kahoy" }, { tagalog: "Hayop", hiligaynon: "Sapat" },
+            { tagalog: "Bulaklak", hiligaynon: "Bulak" }, { tagalog: "Bituin", hiligaynon: "Bituon" }, { tagalog: "Buwan", hiligaynon: "Bulan" }, { tagalog: "Langit", hiligaynon: "Langit" }, { tagalog: "Dagat", hiligaynon: "Dagat" },
+            { tagalog: "bundok", hiligaynon: "bukid"}, { tagalog: "ilog", hiligaynon: "suba"}, { tagalog: "kalsada", hiligaynon: "dalan"}, { tagalog: "sasakyan", hiligaynon: "salakyan"}, { tagalog: "telepono", hiligaynon: "telepono"},
+            { tagalog: "libro", hiligaynon: "libro"}, { tagalog: "sulat", hiligaynon: "sulat"}, { tagalog: "bata", hiligaynon: "bata"}, { tagalog: "matanda", hiligaynon: "tigulang"}, { tagalog: "lalaki", hiligaynon: "lalaki"},
+            { tagalog: "babae", hiligaynon: "babayi"}, { tagalog: "luto", hiligaynon: "luto"}, { tagalog: "linis", hiligaynon: "limpyo"}, { tagalog: "tulog", hiligaynon: "tulog"}, { tagalog: "gising", hiligaynon: "bugtaw"},
+            { tagalog: "takbo", hiligaynon: "dalagan"}, { tagalog: "lakad", hiligaynon: "laktod"}, { tagalog: "sayaw", hiligaynon: "saot"}, { tagalog: "kanta", hiligaynon: "kanta"}, { tagalog: "laro", hiligaynon: "hampang"},
+            { tagalog: "trabaho", hiligaynon: "obra"}, { tagalog: "aral", hiligaynon: "tuon"}, { tagalog: "basa", hiligaynon: "basa"}, { tagalog: "sulat", hiligaynon: "sulat"}, { tagalog: "tanong", hiligaynon: "pamangkot"},
+               { tagalog: "sagot", hiligaynon: "sabat"}, { tagalog: "tawa", hiligaynon: "kadlaw"}, { tagalog: "iyak", hiligaynon: "hibi"}, { tagalog: "galit", hiligaynon: "akig"},
+            { tagalog: "saya", hiligaynon: "kalipay"}, { tagalog: "lungkot", hiligaynon: "kasubo"}, { tagalog: "takot", hiligaynon: "kahadlok"}, { tagalog: "tapang", hiligaynon: "kaisog"}, { tagalog: "pag-asa", hiligaynon: "paglaum"},
+            { tagalog: "pangarap", hiligaynon: "handum"}, { tagalog: "katotohanan", hiligaynon: "kamatuoran"}, { tagalog: "kasinungalingan", hiligaynon: "kabutigan"}, { tagalog: "liwanag", hiligaynon: "kapawa"}, { tagalog: "dilim", hiligaynon: "dulom"},
+            { tagalog: "init", hiligaynon: "init"}, { tagalog: "lamig", hiligaynon: "tugnaw"}, { tagalog: "ulan", hiligaynon: "ulan"}, { tagalog: "araw", hiligaynon: "adlaw"}, { tagalog: "gabi", hiligaynon: "gab-i"},
+            { tagalog: "umaga", hiligaynon: "aga"}, { tagalog: "tanghali", hiligaynon: "udto"}, { tagalog: "hapon", hiligaynon: "hapon"}, { tagalog: "gabi", hiligaynon: "gab-i"}, { tagalog: "oras", hiligaynon: "oras"},
+            { tagalog: "minuto", hiligaynon: "minuto"}, { tagalog: "segundo", hiligaynon: "segundo"}, { tagalog: "linggo", hiligaynon: "semana"}, { tagalog: "buwan", hiligaynon: "bulan"}, { tagalog: "taon", hiligaynon: "tuig"},
+            { tagalog: "dekada", hiligaynon: "dekada"}, { tagalog: "siglo", hiligaynon: "siglo"}, { tagalog: "milennium", hiligaynon: "milennium"}, { tagalog: "pagbabago", hiligaynon: "pagbag-o"}, { tagalog: "panahon", hiligaynon: "panahon"},
+            { tagalog: "kasaysayan", hiligaynon: "kasaysayan"}, { tagalog: "kultura", hiligaynon: "kultura"}, { tagalog: "sining", hiligaynon: "arte"}, { tagalog: "musika", hiligaynon: "musika"}, { tagalog: "sayaw", hiligaynon: "saot"},
+            { tagalog: "pelikula", hiligaynon: "pelikula"}, { tagalog: "telebisyon", hiligaynon: "telebisyon"}, { tagalog: "radyo", hiligaynon: "radyo"}, { tagalog: "internet", hiligaynon: "internet"}, { tagalog: "kompyuter", hiligaynon: "kompyuter"},
+            { tagalog: "software", hiligaynon: "software"}, { tagalog: "hardware", hiligaynon: "hardware"}, { tagalog: "teknolohiya", hiligaynon: "teknolohiya"}, { tagalog: "agham", hiligaynon: "siyensya"}, { tagalog: "matematika", hiligaynon: "matematika"},
+            { tagalog: "pisika", hiligaynon: "pisika"}, { tagalog: "kimika", hiligaynon: "kimika"}, { tagalog: "biyolohiya", hiligaynon: "biyolohiya"}, { tagalog: "heograpiya", hiligaynon: "heograpiya"}, { tagalog: "ekonomiya", hiligaynon: "ekonomiya"},
+            { tagalog: "pulitika", hiligaynon: "politika"}, { tagalog: "sosyolohiya", hiligaynon: "sosyolohiya"}, { tagalog: "sikolohiya", hiligaynon: "sikolohiya"}, { tagalog: "pilosopiya", hiligaynon: "pilosopiya"}, { tagalog: "relihiyon", hiligaynon: "relihiyon"},
+            { tagalog: "pananampalataya", hiligaynon: "pagtuo"}, { tagalog: "simbahan", hiligaynon: "simbahan"}, { tagalog: "moske", hiligaynon: "moske"}, { tagalog: "templo", hiligaynon: "templo"}, { tagalog: "dasal", hiligaynon: "pangamuyo"},
+            { tagalog: "pag-ibig", hiligaynon: "pagpalangga"}, { tagalog: "kapayapaan", hiligaynon: "kalinong"}, { tagalog: "katarungan", hiligaynon: "hustisya"}, { tagalog: "kalayaan", hiligaynon: "kahilwayan"}, { tagalog: "pagkakapantay-pantay", hiligaynon: "pagkapareho"},
+            { tagalog: "karapatan", hiligaynon: "kinamatarong"}, { tagalog: "obligasyon", hiligaynon: "obligasyon"}, { tagalog: "responsibilidad", hiligaynon: "responsibilidad"}, { tagalog: "paggalang", hiligaynon: "pagrespeto"}, { tagalog: "pagmamahal", hiligaynon: "paghigugma"},
+            { tagalog: "pag-aalaga", hiligaynon: "pag-atipan"}, { tagalog: "pagtulong", hiligaynon: "pagbulig"}, { tagalog: "pagbabahagi", hiligaynon: "pagpaambit"}, { tagalog: "pagtanggap", hiligaynon: "pagbaton"}, { tagalog: "pagpapatawad", hiligaynon: "pagpatawad"},
+            { tagalog: "pag-unawa", hiligaynon: "pag-intindi"}, { tagalog: "pagtitiwala", hiligaynon: "pagsalig"}, { tagalog: "katapatan", hiligaynon: "katampad"}, { tagalog: "kabutihan", hiligaynon: "kaayo"}, { tagalog: "kasamaan", hiligaynon: "kalautan"},
+            { tagalog: "pagkakaiba", hiligaynon: "pagkalahi"}, { tagalog: "pagkakaisa", hiligaynon: "paghiliusa"}, { tagalog: "komunidad", hiligaynon: "komunidad"}, { tagalog: "bayan", hiligaynon: "banwa"}, { tagalog: "lungsod", hiligaynon: "siyudad"},
+            { tagalog: "probinsya", hiligaynon: "probinsya"}, { tagalog: "bansa", hiligaynon: "pungsod"}, { tagalog: "mundo", hiligaynon: "kalibutan"}, { tagalog: "kalikasan", hiligaynon: "kinaiyahan"}, { tagalog: "kapaligiran", hiligaynon: "palibot"},
+            { tagalog: "proteksyon", hiligaynon: "proteksyon"}, { tagalog: "konserbasyon", hiligaynon: "konserbasyon"}, { tagalog: "pag-aalaga", hiligaynon: "pag-atipan"}, { tagalog: "paglilinis", hiligaynon: "paglimpyo"},
+            { tagalog: "pag-aari", hiligaynon: "pagpanag-iya"}, { tagalog: "pagbebenta", hiligaynon: "pagbaligya"}, { tagalog: "pagbili", hiligaynon: "pagbakal"}, { tagalog: "pagpapalit", hiligaynon: "pagbaylo"}, { tagalog: "pag-upa", hiligaynon: "pag-upa"},
+            { tagalog: "pagpapaupa", hiligaynon: "pagpaupa"}, { tagalog: "paghiram", hiligaynon: "paghulam"}, { tagalog: "pagpapahiram", hiligaynon: "pagpahulam"}, { tagalog: "pag-utang", hiligaynon: "pag-utang"}, { tagalog: "pagpapautang", hiligaynon: "pagpautang"},
+            { tagalog: "pagbabayad", hiligaynon: "pagbayad"}, { tagalog: "pagkolekta", hiligaynon: "pagkolekta"}, { tagalog: "pag-iimpok", hiligaynon: "pagtipon"}, { tagalog: "pag-iinvest", hiligaynon: "pagpuhunan"}, { tagalog: "pag-aayos", hiligaynon: "pag-ayos"},
+            { tagalog: "pag-aalis", hiligaynon: "pagkuha"}, { tagalog: "pagdadagdag", hiligaynon: "pagdugang"}, { tagalog: "pagbabawas", hiligaynon: "pagbuhin"}, { tagalog: "paghahati", hiligaynon: "pagbahin"}, { tagalog: "pagpaparami", hiligaynon: "pagpadamo"},
+            { tagalog: "pagmumultiplika", hiligaynon: "pagpadamo"}, { tagalog: "pagdidivide", hiligaynon: "pagbahin-bahin"}, { tagalog: "pag-iisa-isa", hiligaynon: "pag-isaisa"}, { tagalog: "pagkokompara", hiligaynon: "pagkomparar"}, { tagalog: "pag-aanalisa", hiligaynon: "pag-analisar"},
+            { tagalog: "paglutas", hiligaynon: "paglutas"}, { tagalog: "pagdedesisyon", hiligaynon: "pagdesisyon"}, { tagalog: "pagpaplano", hiligaynon: "pagplano"}, { tagalog: "pag-oorganisa", hiligaynon: "pag-organisar"}, { tagalog: "pagpapatupad", hiligaynon: "pagpatuman"},
+            { tagalog: "pagtataya", hiligaynon: "pagbanabana"}, { tagalog: "pagsubok", hiligaynon: "pagtilaw"}, { tagalog: "pagtatagumpay", hiligaynon: "pagmadinalag-on"}, { tagalog: "pagkabigo", hiligaynon: "pagkapakyas"}, { tagalog: "pag-aaral", hiligaynon: "pagtuon"},
+            { tagalog: "pagkatuto", hiligaynon: "pagkaton"}, { tagalog: "pagtuturo", hiligaynon: "pagtudlo"}, { tagalog: "pagsasanay", hiligaynon: "paghanas"}, { tagalog: "pagpapabuti", hiligaynon: "pagpaayo"}, { tagalog: "pagbabago", hiligaynon: "pagbag-o"},
+            { tagalog: "pag-unlad", hiligaynon: "pag-uswag"}, { tagalog: "paglago", hiligaynon: "pagtubo"}, { tagalog: "pag-usbong", hiligaynon: "pagtunga"}, { tagalog: "pag-angat", hiligaynon: "pag-alsa"}, { tagalog: "pagbaba", hiligaynon: "pagpanaog"},
+            { tagalog: "pagtaas", hiligaynon: "pagtaas"}, { tagalog: "pagliit", hiligaynon: "pagdiutay"}, { tagalog: "paglawak", hiligaynon: "paglapad"}, { tagalog: "pag-ikli", hiligaynon: "paglip-ot"}, { tagalog: "paghaba", hiligaynon: "paglawig"},
+            { tagalog: "pagbilis", hiligaynon: "pagpadasig"}, { tagalog: "pagbagal", hiligaynon: "pagpahinay"}, { tagalog: "pagtigil", hiligaynon: "pagpundo"}, { tagalog: "paggalaw", hiligaynon: "paghulag"}, { tagalog: "paglipad", hiligaynon: "paglupad"},
+            { tagalog: "paglangoy", hiligaynon: "paglangoy"}, { tagalog: "pag-akyat", hiligaynon: "pagsaka"}, { tagalog: "pagbaba", hiligaynon: "pagpanaog"}, { tagalog: "pagpasok", hiligaynon: "pagsulod"}, { tagalog: "paglabas", hiligaynon: "pagguwa"},
+            { tagalog: "pagpunta", hiligaynon: "pagkadto"}, { tagalog: "pag-uwi", hiligaynon: "pagpauli"}, { tagalog: "pagdating", hiligaynon: "pag-abot"}, { tagalog: "pag-alis", hiligaynon: "paghalin"}, { tagalog: "paghinto", hiligaynon: "pagpundo"},
+            { tagalog: "pagtuloy", hiligaynon: "pagpadayon"}, { tagalog: "pag-iwan", hiligaynon: "pagbiya"}, { tagalog: "pagbalik", hiligaynon: "pagbalik"}, { tagalog: "paghahanap", hiligaynon: "pagpangita"}, { tagalog: "pagkatagpo", hiligaynon: "pagkatukib"},
+            { tagalog: "pagkawala", hiligaynon: "pagkadula"}, { tagalog: "pagkakatagpo", hiligaynon: "pagkatukib"}, { tagalog: "pag-aayos", hiligaynon: "pag-ayos"}, { tagalog: "pag-iwan", hiligaynon: "pagbiya"}, { tagalog: "pag-iwas", hiligaynon: "paglikaw"},
+            { tagalog: "pagtanggap", hiligaynon: "pagbaton"}, { tagalog: "pagtanggi", hiligaynon: "pagbalibad"}, { tagalog: "pagpili", hiligaynon: "pagpili"}, { tagalog: "pagdesisyon", hiligaynon: "pagdesisyon"}, { tagalog: "pagtalaga", hiligaynon: "pagtalana"},
+            { tagalog: "pagtatalaga", hiligaynon: "pagtalana"}, { tagalog: "pagpapasya", hiligaynon: "pagpamat-od"}, { tagalog: "pagpapatunay", hiligaynon: "pagpamatuod"}, { tagalog: "pagpapawalang-bisa", hiligaynon: "pagpawalang-bisa"}, { tagalog: "pagpapalit", hiligaynon: "pagbaylo"},
+            { tagalog: "pagpapanatili", hiligaynon: "pagpabilin"}, { tagalog: "pagpapahinto", hiligaynon: "pagpaundan"}, { tagalog: "pagpapatuloy", hiligaynon: "pagpadayon"}, { tagalog: "pagpapalakas", hiligaynon: "pagpabaskog"}, { tagalog: "pagpapahina", hiligaynon: "pagpaluya"},
+            { tagalog: "pagpapaliwanag", hiligaynon: "pagpaathag"}, { tagalog: "pagpapakita", hiligaynon: "pagpakita"},
+            { tagalog: "pagpapalabas", hiligaynon: "pagpaguwa"}, { tagalog: "pagpapapasok", hiligaynon: "pagsulod"}, { tagalog: "pagpapahinto", hiligaynon: "pagpaundan"}, { tagalog: "pagpapatuloy", hiligaynon: "pagpadayon"}, { tagalog: "pagpapalit", hiligaynon: "pagbaylo"},
+            { tagalog: "pagpapalitan", hiligaynon: "pagbayluhanay"}, { tagalog: "pagpapadala", hiligaynon: "pagpadala"}, { tagalog: "pagtanggap", hiligaynon: "pagbaton"}, { tagalog: "pagpapalabas", hiligaynon: "pagpaguwa"}, { tagalog: "pagpapapasok", hiligaynon: "pagsulod"},
+            { tagalog: "pagpapahinto", hiligaynon: "pagpaundan"}, { tagalog: "pagpapatuloy", hiligaynon: "pagpadayon"}, { tagalog: "pagpapalit", hiligaynon: "pagbaylo"}, { tagalog: "pagpapalitan", hiligaynon: "pagbayluhanay"}, { tagalog: "pagpapadala", hiligaynon: "pagpadala"},
+            { tagalog: "pagtanggap", hiligaynon: "pagbaton"}, { tagalog: "pagpapalabas", hiligaynon: "pagpaguwa"}, { tagalog: "pagpapapasok", hiligaynon: "pagsulod"}, { tagalog: "pagpapahinto", hiligaynon: "pagpaundan"}, { tagalog: "pagpapatuloy", hiligaynon: "pagpadayon"},
+            { tagalog: "pagpapalit", hiligaynon: "pagbaylo"}, { tagalog: "pagpapalitan", hiligaynon: "pagbayluhanay"}, { tagalog: "pagpapadala", hiligaynon: "pagpadala"}, { tagalog: "pagtanggap", hiligaynon: "pagbaton"}, { tagalog: "pagpapalabas", hiligaynon: "pagpaguwa"},
+            { tagalog: "pagpapapasok", hiligaynon: "pagsulod"}, { tagalog: "pagpapahinto", hiligaynon: "pagpaundan"}, { tagalog: "pagpapatuloy", hiligaynon: "pagpadayon"}, { tagalog: "pagpapalit", hiligaynon: "pagbaylo"}, { tagalog: "pagpapalitan", hiligaynon: "pagbayluhanay"},
+            { tagalog: "pagpapadala", hiligaynon: "pagpadala"}, { tagalog: "pagtanggap", hiligaynon: "pagbaton"}, { tagalog: "pagpapalabas", hiligaynon: "pagpaguwa"}, { tagalog: "pagpapapasok", hiligaynon: "pagsulod"}, { tagalog: "pagpapahinto", hiligaynon: "pagpaundan"},
+            { tagalog: "pagpapatuloy", hiligaynon: "pagpadayon"}, { tagalog: "pagpapalit", hiligaynon: "pagbaylo"}, { tagalog: "pagpapalitan", hiligaynon: "pagbayluhanay"}, { tagalog: "pagpapadala", hiligaynon: "pagpadala"}, { tagalog: "pagtanggap", hiligaynon: "pagbaton"},
+            { tagalog: "pagpapalabas", hiligaynon: "pagpaguwa"}, { tagalog: "pagpapapasok", hiligaynon: "pagsulod"}, { tagalog: "pagpapahinto", hiligaynon: "pagpaundan"}, { tagalog: "pagpapatuloy", hiligaynon: "pagpadayon"}, { tagalog: "pagpapalit", hiligaynon: "pagbaylo"},
+            { tagalog: "pagpapalitan", hiligaynon: "pagbayluhanay"}, { tagalog: "pagpapadala", hiligaynon: "pagpadala"}, { tagalog: "pagtanggap", hiligaynon: "pagbaton"}, { tagalog: "pagpapalabas", hiligaynon: "pagpaguwa"}, { tagalog: "pagpapapasok", hiligaynon: "pagsulod"},
+            { tagalog: "pagpapahinto", hiligaynon: "pagpaundan"}, { tagalog: "pagpapatuloy", hiligaynon: "pagpadayon"}, { tagalog: "pagpapalit", hiligaynon: "pagbaylo"}, { tagalog: "pagpapalitan", hiligaynon: "pagbayluhanay"}, { tagalog: "pagpapadala", hiligaynon: "pagpadala"},
+            { tagalog: "pagtanggap", hiligaynon: "pagbaton"}, { tagalog: "pagpapalabas", hiligaynon: "pagpaguwa"}, { tagalog: "pagpapapasok", hiligaynon: "pagsulod"}, { tagalog: "pagpapahinto", hiligaynon: "pagpaundan"}, { tagalog: "pagpapatuloy", hiligaynon: "pagpadayon"},
+            { tagalog: "pagpapalit", hiligaynon: "pagbaylo"}, { tagalog: "pagpapalitan", hiligaynon: "pagbayluhanay"}, { tagalog: "pagpapadala", hiligaynon: "pagpadala"}, { tagalog: "pagtanggap", hiligaynon: "pagbaton"}, { tagalog: "pagpapalabas", hiligaynon: "pagpaguwa"},
+            { tagalog: "pagpapapasok", hiligaynon: "pagsulod"}, { tagalog: "pagpapahinto", hiligaynon: "pagpaundan"}, { tagalog: "pagpapatuloy", hiligaynon: "pagpadayon"}, { tagalog: "pagpapalit", hiligaynon: "pagbaylo"}, { tagalog: "pagpapalitan", hiligaynon: "pagbayluhanay"},
+            { tagalog: "pagpapadala", hiligaynon: "pagpadala"}, { tagalog: "pagtanggap", hiligaynon: "pagbaton"}, { tagalog: "pagpapalabas", hiligaynon: "pagpaguwa"}, { tagalog: "pagpapapasok", hiligaynon: "pagsulod"}, { tagalog: "pagpapahinto", hiligaynon: "pagpaundan"},
+            { tagalog: "pagpapatuloy", hiligaynon: "pagpadayon"}, { tagalog: "pagpapalit", hiligaynon: "pagbaylo"}, { tagalog: "pagpapalitan", hiligaynon: "pagbayluhanay"}, { tagalog: "pagpapadala", hiligaynon: "pagpadala"}, { tagalog: "pagtanggap", hiligaynon: "pagbaton"},
+            { tagalog: "pagpapalabas", hiligaynon: "pagpaguwa"}, { tagalog: "pagpapapasok", hiligaynon: "pagsulod"}, { tagalog: "pagpapahinto", hiligaynon: "pagpaundan"}, { tagalog: "pagpapatuloy", hiligaynon: "pagpadayon"}, { tagalog: "pagpapalit", hiligaynon: "pagbaylo"},
+            { tagalog: "pagpapalitan", hiligaynon: "pagbayluhanay"}, { tagalog: "pagpapadala", hiligaynon: "pagpadala"}, { tagalog: "pagtanggap", hiligaynon: "pagbaton"}, 
+        ];
+        
+
+                   let currentPage = 0;
+            const wordsPerPage = 20;
+            let filteredData = [...dictionaryData];
+
+            function displayWords(page) {
+                const wordList = document.getElementById('wordList');
+                if (wordList) {
+                    wordList.innerHTML = '';
+                    const start = page * wordsPerPage;
+                    const end = start + wordsPerPage;
+                    const pageWords = filteredData.slice(start, end);
+
+                    pageWords.forEach(word => {
+                        const wordPair = document.createElement('div');
+                        wordPair.classList.add('word-pair');
+                        wordPair.textContent = `${word.tagalog} - ${word.hiligaynon}`;
+                        wordList.appendChild(wordPair);
+                    });
+                }
+            }
+
+            function updateFilteredData() {
+                const searchTerm = document.getElementById('searchBar').value.toLowerCase();
+                filteredData = dictionaryData.filter(word =>
+                    word.tagalog.toLowerCase().includes(searchTerm) ||
+                    word.hiligaynon.toLowerCase().includes(searchTerm)
+                );
+                currentPage = 0;
+                displayWords(currentPage);
+            }
+
+            function showDictionaryPage() {
+                document.body.style.opacity = 0;
+                setTimeout(() => {
+                    document.getElementById('initialContent').style.display = 'none';
+                    document.getElementById('dictionaryPage').style.display = 'block';
+                    document.body.style.opacity = 1;
+                    displayWords(currentPage);
+                }, 500);
+            }
+
+            const enterButton = document.getElementById('enterDictionaryButton');
+            if (enterButton) {
+                enterButton.addEventListener('click', showDictionaryPage);
+            }
+
+            const prevButton = document.getElementById('prevPage');
+            if (prevButton) {
+                prevButton.addEventListener('click', () => {
+                    if (currentPage > 0) {
+                        currentPage--;
+                        displayWords(currentPage);
+                    }
+                });
+            }
+
+            const nextButton = document.getElementById('nextPage');
+            if (nextButton) {
+                nextButton.addEventListener('click', () => {
+                    if ((currentPage + 1) * wordsPerPage < filteredData.length) {
+                        currentPage++;
+                        displayWords(currentPage);
+                    }
+                });
+            }
+
+            const searchBar = document.getElementById('searchBar');
+            if (searchBar) {
+                searchBar.addEventListener('input', updateFilteredData);
+            }
+
+            particlesJS('particles-js', {
+    "particles": {
+        "number": {
+            "value": 80,
+            "density": {
+                "enable": true,
+                "value_area": 800
+            }
+        },
+        "color": {
+            "value": "#ffffff"
+        },
+        "shape": {
+            "type": "circle",
+            "stroke": {
+                "width": 0,
+                "color": "#000000"
+            },
+            "polygon": {
+                "nb_sides": 5
+            }
+        },
+        "opacity": {
+            "value": 0.5,
+            "random": false,
+            "anim": {
+                "enable": false,
+                "speed": 1,
+                "opacity_min": 0.1,
+                "sync": false
+            }
+        },
+        "size": {
+            "value": 3,
+            "random": true,
+            "anim": {
+                "enable": false,
+                "speed": 40,
+                "size_min": 0.1,
+                "sync": false
+            }
+        },
+        "line_linked": {
+            "enable": true,
+            "distance": 150,
+            "color": "#ffffff",
+            "opacity": 0.4,
+            "width": 1
+        },
+        "move": {
+            "enable": true,
+            "speed": 6,
+            "direction": "none",
+            "random": false,
+            "straight": false,
+            "out_mode": "out",
+            "bounce": false,
+            "attract": {
+                "enable": false,
+                "rotateX": 600,
+                "rotateY": 1200
+            }
+        }
+    },
+    "interactivity": {
+        "detect_on": "canvas",
+        "events": {
+            "onhover": {
+                "enable": true,
+                "mode": "repulse"
+            },
+            "onclick": {
+                "enable": true,
+                "mode": "push"
+            },
+            "resize": true
+        },
+        "modes": {
+            "repulse": {
+                "distance": 100,
+                "duration": 0.4
+            },
+            "push": {
+                "particles_nb": 4
+            }
+        }
+    },
+    "retina_detect": true
+}); // Correctly closed particlesJS function call.
+}); // Correctly closed DOMContentLoaded listener
+
+    </script>
+</body>
+</html>
